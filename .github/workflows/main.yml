@@ -1,0 +1,29 @@
+name: Create Jira Issue from GitHub PR
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  create_jira_issue:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Create Jira Issue
+      run: |
+        curl -X POST \
+          -H "Authorization: Basic ${{ secrets.JIRA_API_TOKEN }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "fields": {
+              "project": {"key": "PROJ"},
+              "summary": "Fix session timeout issue",
+              "description": "This issue was created from a GitHub PR #${{ github.event.pull_request.number }}. It addresses session timeout issues.",
+              "issuetype": {"name": "Story"},
+              "assignee": {"name": "john_doe"},
+              "labels": ["bug", "high-priority"]
+            }
+          }' \
+          https://your-jira-instance.atlassian.net/rest/api/2/issue
